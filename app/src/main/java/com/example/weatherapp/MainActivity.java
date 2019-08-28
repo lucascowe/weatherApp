@@ -62,25 +62,31 @@ public class MainActivity extends AppCompatActivity {
                 toDisplay += "Name: " + str + "\n";
                 str = jsonObject.getString("weather");
                 JSONArray jsonArray = new JSONArray(str);
-                Log.i("Debug", "the json" + str);
-                for (int i = 0; i < jsonArray.length(); i++) {
-                    JSONObject part = jsonArray.getJSONObject(i);
-                    toDisplay += "Main: " + part.getString("main") + "\nDescription: " +
-                            part.getString("description") + "\n";
+                if (jsonArray.length() != 0) {
+                    Log.i("Debug", "the json" + str);
+                    for (int i = 0; i < jsonArray.length(); i++) {
+                        JSONObject part = jsonArray.getJSONObject(i);
+                        toDisplay += "Main: " + part.getString("main") + "\nDescription: " +
+                                part.getString("description") + "\n";
+                    }
+                    String strMain = jsonObject.getString("main");
+                    JSONObject temps = new JSONObject(strMain);
+
+                    double currentTemp = (temps.getDouble("temp") - 273.15) * 9 / 5 + 32;
+                    double min = (temps.getDouble("temp_min") - 273.15) * 9 / 5 + 32;
+                    double max = (temps.getDouble("temp_max") - 273.15) * 9 / 5 + 32;
+                    toDisplay += String.format("Current Temp: %.1f\nHigh: %.1f\nLow: %.1f\nHumidity: %d %%\n",
+                            currentTemp, max, min, temps.getInt("humidity"));
+                    textView.setText(toDisplay);
+                } else {
+                    textView.setText("Could not find " + editText.getText().toString() + "\n\nEither you can't spell or you made this place up!");
                 }
-                String strMain = jsonObject.getString("main");
-                JSONObject temps = new JSONObject(strMain);
 
-                double currentTemp = (temps.getDouble("temp") - 273.15) * 9 / 5 + 32;
-                double min = (temps.getDouble("temp_min") - 273.15) * 9 / 5 + 32;
-                double max = (temps.getDouble("temp_max") - 273.15) * 9 / 5 + 32;
-                toDisplay += String.format("Current Temp: %.1f\nHigh: %.1f\nLow: %.1f\nHumidity: %d %%\n",
-                        currentTemp, max, min, temps.getInt("humidity"));
-
-            } catch (JSONException e) {
+            } catch (Exception e) {
                 e.printStackTrace();
+                textView.setText("Could not find " + editText.getText().toString() + "\n\nEither you can't spell or you made this place up!");
             }
-            textView.setText(toDisplay);
+
         }
     }
 
@@ -89,12 +95,9 @@ public class MainActivity extends AppCompatActivity {
         String appId = "990e3ff11e805e0bd89fd68874bd12de";
         String endPoint = String.format("https://api.openweathermap.org/data/2.5/weather?q=%s&APPID=%s",
                 editText.getText().toString(), appId);
-//        http://api.openweathermap.org/data/2.5/weather?q=London&APPID=990e3ff11e805e0bd89fd68874bd12de
-        Log.i("Debug", "the json will come from https://api.openweathermap.org/data/2.5/weather?q=London&APPID=990e3ff11e805e0bd89fd68874bd12de");
         Log.i("Debug", "the json will come from " + endPoint);
 
         getWeather.execute(endPoint);
-//        getWeather.execute(String.format("http://api.openweathermap.org/data/2.5/weather?q=%s&APPID=%s", textView.getText().toString(), appId));
     }
 
     @Override
